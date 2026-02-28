@@ -1,0 +1,92 @@
+{{template "base.html" .}}
+
+{{define "content"}}
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <!-- Left column: long-term priorities -->
+    <div class="bg-white p-4 rounded shadow">
+        <h2 class="text-lg font-semibold mb-2">Your Long-Term Priorities</h2>
+        <div class="space-y-2">
+            {{$lt := .LongTerm}}
+            <div class="flex justify-between"><span>Social Life</span><span class="font-mono">{{$lt.SocialLife}}</span></div>
+            <div class="flex justify-between"><span>Academics</span><span class="font-mono">{{$lt.Academics}}</span></div>
+            <div class="flex justify-between"><span>Co-curriculum</span><span class="font-mono">{{$lt.CoCurriculum}}</span></div>
+            <div class="flex justify-between"><span>Extra-curriculum</span><span class="font-mono">{{$lt.ExtraCurriculum}}</span></div>
+            <div class="flex justify-between"><span>Health</span><span class="font-mono">{{$lt.Health}}</span></div>
+            <div class="flex justify-between"><span>Self Projects</span><span class="font-mono">{{$lt.SelfProjects}}</span></div>
+        </div>
+    </div>
+
+    <!-- Middle column: chart -->
+    <div class="bg-white p-4 rounded shadow md:col-span-2">
+        <h2 class="text-lg font-semibold mb-2">Long-Term vs Last Week</h2>
+        {{if .LastWeek}}
+        <canvas id="weekChart" width="400" height="200"></canvas>
+        <script>
+            const ctx = document.getElementById('weekChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: {{.LabelsJSON}},
+            datasets: [
+                { label: 'Long-Term', data: {{.LongTermValuesJSON}}, backgroundColor: 'rgba(54, 162, 235, 0.5)' },
+            { label: 'Last Week', data: {{.LastWeekValuesJSON}}, backgroundColor: 'rgba(255, 99, 132, 0.5)' }
+            ]
+            }
+            });
+        </script>
+        {{else}}
+        <p class="text-gray-500">No week data yet. <a href="/week-entry" class="text-blue-600">Enter first week</a>.</p>
+        {{end}}
+    </div>
+
+    <!-- Cumulative deviation -->
+    {{if .Weeks}}
+    <div class="bg-white p-4 rounded shadow">
+        <h2 class="text-lg font-semibold mb-2">Cumulative Average Deviation</h2>
+        <div class="space-y-2">
+            {{$dev := .CumulativeDev}}
+            {{range $cat, $val := $dev}}
+            <div class="flex justify-between">
+                <span class="capitalize">{{$cat | replace "_" " "}}</span>
+                <span class="font-mono {{if gt $val 0.0}}text-green-600{{else if lt $val 0.0}}text-red-600{{end}}">
+                    {{printf "%.2f" $val}}
+                </span>
+            </div>
+            {{end}}
+        </div>
+    </div>
+    {{end}}
+
+    <!-- Enter new week button -->
+    {{if .CanAddWeek}}
+    <div class="col-span-full text-center mt-4">
+        <a href="/week-entry" class="bg-green-600 text-white px-6 py-2 rounded">Enter Week {{.NextWeekNumber}} Data</a>
+    </div>
+    {{end}}
+
+    <!-- Other users -->
+    <div class="col-span-full bg-white p-4 rounded shadow mt-4">
+        <h2 class="text-lg font-semibold mb-2">Other Users' Priorities</h2>
+        {{if .OtherUsers}}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {{range .OtherUsers}}
+            <div class="border p-3 rounded">
+                <p class="font-medium">User #{{.ID}}</p>
+                <div class="text-sm space-y-1">
+                    {{$lt := .LongTerm}}
+                    <div class="flex justify-between"><span>Social:</span><span>{{$lt.SocialLife}}</span></div>
+                    <div class="flex justify-between"><span>Academics:</span><span>{{$lt.Academics}}</span></div>
+                    <div class="flex justify-between"><span>Co-curric:</span><span>{{$lt.CoCurriculum}}</span></div>
+                    <div class="flex justify-between"><span>Extra:</span><span>{{$lt.ExtraCurriculum}}</span></div>
+                    <div class="flex justify-between"><span>Health:</span><span>{{$lt.Health}}</span></div>
+                    <div class="flex justify-between"><span>Projects:</span><span>{{$lt.SelfProjects}}</span></div>
+                </div>
+            </div>
+            {{end}}
+        </div>
+        {{else}}
+        <p class="text-gray-500">No other users yet.</p>
+        {{end}}
+    </div>
+</div>
+{{end}}

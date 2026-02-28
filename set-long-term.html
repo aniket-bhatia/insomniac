@@ -1,0 +1,32 @@
+{{template "base.html" .}}
+
+{{define "content"}}
+<div class="max-w-md mx-auto bg-white p-6 rounded shadow">
+    <h1 class="text-2xl font-bold mb-4">Set Your Long-Term Priorities</h1>
+    <p class="mb-4">Allocate 30 points across these areas.</p>
+    <form method="post" action="/set-long-term">
+        {{range $cat := .Categories}}
+        <div class="flex justify-between items-center mb-2">
+            <label>{{$cat.Name}}</label>
+            <input type="number" name="{{$cat.Key}}" min="0" max="30" value="0" class="border rounded px-2 py-1 w-20"
+                   oninput="updateTotal()" required>
+        </div>
+        {{end}}
+        <div class="flex justify-between font-semibold mt-4">
+            <span>Total:</span>
+            <span id="total" class="text-red-600">0/30</span>
+        </div>
+        <button type="submit" class="mt-6 w-full bg-blue-600 text-white py-2 rounded">Save Priorities</button>
+    </form>
+    <script>
+        function updateTotal() {
+            let inputs = document.querySelectorAll('input[type=number]');
+            let total = 0;
+            inputs.forEach(i => total += parseInt(i.value) || 0);
+            document.getElementById('total').innerText = total + '/30';
+            document.getElementById('total').className = total === 30 ? 'text-green-600' : 'text-red-600';
+        }
+        updateTotal();
+    </script>
+</div>
+{{end}}
